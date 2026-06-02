@@ -117,7 +117,7 @@ The library includes an automated visualization suite (located in `examples/gene
 
 ## 📄 Formal Report
 
-A comprehensive 20+ page technical report detailing the design choices, complexity analysis, and numerical experiments is available:
+A comprehensive 10+ page technical report detailing the design choices, complexity analysis, and numerical experiments is available:
 👉 **[Read the Full Technical Report (PDF)](report.pdf)**
 
 ---
@@ -138,5 +138,3 @@ A comprehensive 20+ page technical report detailing the design choices, complexi
 * [ ] **SIMD Acceleration:** Utilizing AVX-512 for large-scale matrix operations.
 
 ---
-
-*June 2026*
