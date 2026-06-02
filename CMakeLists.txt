@@ -4,6 +4,10 @@ project(NumericalMethodsFromScratch VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fno-char8_t)
+endif()
+
 # Include directories
 include_directories(include)
 
@@ -45,17 +49,15 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-# --- Targets ---
-
 # Main Library (will contain the implementations)
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE include)
-target_link_libraries(${PROJECT_NAME} INTERFACE fmt::fmt Eigen3::Eigen matplot::matplot)
+target_link_libraries(${PROJECT_NAME} INTERFACE fmt::fmt Eigen3::Eigen matplot)
 
 # --- Subdirectories ---
 
 # add_subdirectory(src)
-# add_subdirectory(tests)
-# add_subdirectory(examples)
+add_subdirectory(tests)
+add_subdirectory(examples)
 
 enable_testing()

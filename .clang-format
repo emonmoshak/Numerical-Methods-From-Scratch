@@ -1,0 +1,28 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+Standard: C++20
+AllowShortFunctionsOnASingleLine: Empty
+FixNamespaceComments: true
+ReflowComments: true
+SortIncludes: true
+IncludeBlocks: Regroup
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Never
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+NamespaceIndentation: None
+PointerAlignment: Left
+SpaceAfterCStyleCast: true
+SpaceBeforeRangeBasedForLoopColon: true
