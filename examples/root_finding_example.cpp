@@ -27,9 +27,9 @@ int main() {
     fig->size(800, 600);
 
     auto ax1 = mp::subplot(1, 1, 0);
-    mp::semilogy(res_bis.errors, "-o")->name("Bisection");
+    mp::semilogy(res_bis.errors, "-o")->display_name("Bisection");
     mp::hold(true);
-    mp::semilogy(res_nr.errors, "-s")->name("Newton-Raphson");
+    mp::semilogy(res_nr.errors, "-s")->display_name("Newton-Raphson");
     
     mp::title("Convergence History (f(x) = x^2 - 2)");
     mp::xlabel("Iteration");
