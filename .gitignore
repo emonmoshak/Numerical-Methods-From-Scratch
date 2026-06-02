@@ -1,0 +1,54 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.libs
+*.dll
+*.dylib
+*.bundle
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+Makefile
+build/
+out/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.user
+
+# Python (if any scripts are used)
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
