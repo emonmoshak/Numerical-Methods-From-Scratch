@@ -10,6 +10,7 @@
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{caption}
+\usepackage{titlesec}
 
 \geometry{margin=1in}
 
@@ -42,22 +43,24 @@
     \vspace{2cm}
     \textbf{\huge Numerical Methods From Scratch} \\
     \vspace{0.5cm}
-    \Large Engineering Mathematics Implemented in Modern C++20 \\
+    \Large A Comprehensive Implementation of Engineering Mathematics in C++20 \\
     \vspace{1cm}
-    \large \textit{Research \& Implementation Report}
+    \large \textit{Final Technical Project Report}
 }
 \author{
-    \textbf{Project Lead} \\
-    \small Numerical Analysis & Scientific Computing
+    \textbf{Md Emon Moshak} \\
+    \small Research in Scientific Computing & Applied Mathematics
 }
-\date{June 2, 2026}
+\date{May 2, 2026}
 
 \begin{document}
 
 \maketitle
+\thispagestyle{empty}
 
+\newpage
 \begin{abstract}
-This report documents the architectural design and mathematical verification of a high-performance scientific computing library built from first principles. Utilizing the C++20 standard, \textit{Numerical Methods From Scratch} provides a transparent framework for solving non-linear equations, linear systems, and differential equations. The project emphasizes numerical stability, error propagation analysis, and computational efficiency. Every algorithm is validated against theoretical convergence rates, demonstrating the synergy between abstract mathematical theory and modern software engineering.
+This project, \textit{Numerical Methods From Scratch}, presents a rigorous implementation of fundamental numerical algorithms using the modern C++20 standard. The primary objective was to build a scientific computing library from first principles, focusing on mathematical derivation, numerical stability, and computational efficiency. The report details the implementation of root-finding techniques, linear system solvers, interpolation methods, numerical calculus, and ordinary differential equation (ODE) integrators. By leveraging C++20 features such as template metaprogramming, RAII, and the Eigen library for linear algebra primitives, the resulting toolkit provides a robust and transparent platform for engineering analysis. Every algorithm is subjected to rigorous error analysis and validated against theoretical convergence rates, demonstrating the efficacy of the first-principles approach in scientific software development.
 \end{abstract}
 
 \newpage
@@ -65,98 +68,113 @@ This report documents the architectural design and mathematical verification of 
 \newpage
 
 \section*{Nomenclature}
-\addcontents line{toc}{section}{Nomenclature}
+\addcontentsline{toc}{section}{Nomenclature}
 \begin{table}[h]
+\centering
 \begin{tabular}{ll}
-$\epsilon$ & Convergence tolerance \\
-$h$ & Step size / interval length \\
-$e_n$ & Absolute error at iteration $n$ \\
-$\mathcal{O}$ & Big-O notation for complexity and error order \\
-$f(x)$ & Objective function \\
-$A, b$ & Matrix and vector for linear systems $Ax=b$ \\
-$y'$ & First-order derivative $\frac{dy}{dt}$ \\
-$\text{res}$ & Residual norm $||Ax - b||$
+\toprule
+Symbol & Description \\
+\midrule
+$\epsilon$ & Convergence tolerance threshold \\
+$h$ & Step size or interval length \\
+$e_n$ & Absolute error at the $n$-th iteration, $|x_n - r|$ \\
+$\mathcal{O}(h^p)$ & Big-O notation representing the order of accuracy $p$ \\
+$f(x)$ & Continuous objective function for root finding or calculus \\
+$f'(x)$ & First-order derivative of function $f$ \\
+$A$ & Coefficient matrix of a linear system ($n \times n$) \\
+$b$ & Constant vector of a linear system ($n \times 1$) \\
+$x$ & Solution vector to be determined \\
+$L, U$ & Lower and Upper triangular matrices in LU decomposition \\
+$y(t)$ & Solution to an initial value problem (ODE) \\
+$\text{res}$ & Residual norm, calculated as $||Ax - b||_2$ \\
+\bottomrule
 \end{tabular}
 \end{table}
 
 \section{Introduction}
-The field of numerical analysis is foundational to modern engineering and scientific discovery. While high-level environments like MATLAB or Python's NumPy provide powerful abstraction, there is significant value in implementing core algorithms from scratch to understand their limitations, stability characteristics, and performance trade-offs.
+Numerical analysis is the study of algorithms that use numerical approximation for the problems of mathematical analysis. In modern engineering, these methods are the backbone of simulation software, control systems, and data analysis tools. While high-level environments provide pre-built solvers, a deep understanding of the underlying mechanics is essential for ensuring stability and accuracy in sensitive applications such as robotics or aerospace engineering.
 
-This project aims to bridge the gap between abstract mathematical theory and concrete software implementation. By using C++20, we take advantage of advanced features such as concepts, ranges, and improved template support to create a type-safe and performant library. The primary dependencies include \texttt{Eigen} for matrix operations, \texttt{matplotplusplus} for visualization, and \texttt{GoogleTest} for rigorous verification.
+This report documents the design and development of the \textit{Numerical Methods From Scratch} library. The project bridges the gap between abstract mathematical theory and high-performance implementation. By using C++20, we achieve high efficiency while maintaining clear, type-safe abstractions. The library is designed to be modular, transparent, and educationally valuable, exposing the convergence history and internal state of each solver.
 
-\section{Root Finding Methods}
-Root-finding involves finding $x$ such that $f(x) = 0$. We implemented four fundamental methods.
+\section{Root Finding Algorithms}
+Root-finding involves determining $x$ such that $f(x) = 0$. These methods are iterative and start with an initial guess or interval.
 
 \subsection{Bisection Method}
-The Bisection Method relies on the Intermediate Value Theorem. For a continuous function $f$, if $f(a)f(b) < 0$, a root exists in $[a, b]$.
+The Bisection method is based on the Intermediate Value Theorem. If a continuous function $f(x)$ changes sign over an interval $[a, b]$, then a root must exist within that interval. The algorithm repeatedly halves the interval:
 \begin{equation}
     c = \frac{a+b}{2}
 \end{equation}
-While slow (linear convergence), it is unconditionally stable.
+If $f(a) \cdot f(c) < 0$, the root is in $[a, c]$; otherwise, it is in $[c, b]$. The method is robust and guaranteed to converge, albeit linearly with a convergence rate of $0.5$.
 
 \subsection{Newton-Raphson Method}
-Newton's method uses the first-order Taylor expansion:
+Newton's method uses a first-order Taylor series expansion to approximate the function linearly at the current point $x_n$:
 \begin{equation}
     x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}
 \end{equation}
-It offers quadratic convergence ($e_{n+1} \approx C e_n^2$) but requires the existence and calculation of the derivative.
+This method exhibits quadratic convergence ($e_{n+1} \approx C e_n^2$), making it extremely fast when the initial guess is close to the root. However, it requires the existence and calculation of the analytical derivative.
 
 \subsection{Secant Method}
-The Secant method approximates the derivative using two points:
+The Secant method approximates the derivative using two previous points, eliminating the need for an analytical $f'(x)$:
 \begin{equation}
     x_{n+1} = x_n - f(x_n) \frac{x_n - x_{n-1}}{f(x_n) - f(x_{n-1})}
 \end{equation}
-It avoids analytical derivatives while maintaining superlinear convergence ($\phi \approx 1.618$).
+It has a superlinear convergence rate ($\phi \approx 1.618$).
 
-\section{Linear Algebra}
-Solving $Ax=b$ is the workhorse of scientific computing.
+\section{Linear Algebra Solvers}
+Solving large systems of linear equations $Ax = b$ is a fundamental requirement in finite element analysis and optimization.
 
-\subsection{LU Decomposition}
-We implemented Doolittle's algorithm to factor $A = LU$, where $L$ is unit lower triangular and $U$ is upper triangular.
-\begin{equation}
-    A = \begin{pmatrix} 1 & 0 \\ l_{21} & 1 \end{pmatrix} \begin{pmatrix} u_{11} & u_{12} \\ 0 & u_{22} \end{pmatrix}
-\end{equation}
-This allows solving multiple systems with different $b$ in $O(n^2)$ time after an initial $O(n^3)$ decomposition.
+\subsection{Direct Methods: LU Decomposition}
+Direct methods find the exact solution (within machine precision) in a finite number of steps. LU Decomposition factors $A = LU$ using Doolittle's algorithm. Once factored, the system is solved in two steps:
+\begin{enumerate}
+    \item Forward substitution: $Ly = b$
+    \item Backward substitution: $Ux = y$
+\end{enumerate}
+This is particularly efficient for solving systems with multiple right-hand side vectors.
 
-\subsection{Iterative Solvers}
-For large sparse systems, we implemented Jacobi and Gauss-Seidel methods. Gauss-Seidel uses the iteration:
+\subsection{Iterative Methods: Jacobi and Gauss-Seidel}
+Iterative methods are preferred for large, sparse systems. They start with an initial guess $x^{(0)}$ and refine it. The Gauss-Seidel update rule is:
 \begin{equation}
     x_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{j < i} a_{ij} x_j^{(k+1)} - \sum_{j > i} a_{ij} x_j^{(k)} \right)
 \end{equation}
-Convergence is guaranteed for strictly diagonally dominant matrices.
+Convergence is guaranteed if the matrix $A$ is strictly diagonally dominant.
 
-\section{Interpolation}
-Interpolation fits a function to discrete data points.
+\section{Interpolation and Approximation}
+Interpolation seeks a function $P(x)$ that passes exactly through a set of points $(x_i, y_i)$.
+
+\subsection{Polynomial Interpolation}
+We implemented Lagrange and Newton forms. While useful for small datasets, high-degree polynomials can suffer from Runge's phenomenon, where oscillations occur at the boundaries.
 
 \subsection{Cubic Spline Interpolation}
-Cubic splines provide a piecewise cubic polynomial $S(x)$ that is $C^2$ continuous.
+Cubic splines solve the oscillation problem by using piecewise cubic polynomials $S_i(x)$ that are $C^2$ continuous (continuous first and second derivatives at the knots).
 \begin{equation}
     S_i(x) = a_i + b_i(x-x_i) + c_i(x-x_i)^2 + d_i(x-x_i)^3
 \end{equation}
-Unlike high-degree global polynomials, splines avoid Runge's phenomenon and provide smooth approximations.
+This results in a smooth curve that is highly stable for large datasets.
 
-\section{Numerical Differentiation}
-We utilize finite difference quotients to approximate derivatives.
-\begin{itemize}
-    \item \textbf{Central Difference}: $f'(x) \approx \frac{f(x+h) - f(x-h)}{2h} + O(h^2)$
-\end{itemize}
-The central difference is preferred for its second-order accuracy.
+\section{Numerical Calculus}
+Approximating derivatives and integrals is necessary when analytical forms are unavailable or discrete data is provided.
 
-\section{Numerical Integration}
-Quadrature rules approximate $\int_a^b f(x) dx$.
-
-\subsection{Gaussian Quadrature}
-Gaussian quadrature selects optimal nodes $x_i$ and weights $w_i$:
+\subsection{Numerical Differentiation}
+We utilize finite difference quotients. The Central Difference scheme provides second-order accuracy:
 \begin{equation}
-    \int_{-1}^1 f(x) dx \approx \sum_{i=1}^n w_i f(x_i)
+    f'(x) \approx \frac{f(x+h) - f(x-h)}{2h} + \mathcal{O}(h^2)
 \end{equation}
-An $n$-point rule is exact for polynomials of degree $2n-1$.
+
+\subsection{Numerical Integration (Quadrature)}
+Integration is performed using Newton-Cotes formulas (Trapezoidal, Simpson's) and Gaussian Quadrature. Simpson's 1/3 rule provides fourth-order accuracy for smooth functions:
+\begin{equation}
+    \int_a^b f(x) dx \approx \frac{h}{3} \left[ f(a) + 4 \sum_{i \text{ odd}} f(x_i) + 2 \sum_{i \text{ even}} f(x_i) + f(b) \right]
+\end{equation}
+Gaussian Quadrature chooses optimal points to integrate polynomials of degree $2n-1$ exactly with only $n$ points.
 
 \section{Ordinary Differential Equations}
-We solve Initial Value Problems (IVPs) of the form $y' = f(t, y)$.
+Initial Value Problems (IVPs) $y' = f(t, y)$ are solved by stepping through time.
 
-\subsection{Runge-Kutta 4 (RK4)}
-RK4 is a high-accuracy fourth-order method:
+\subsection{Euler and Improved Euler}
+The standard Euler method is first-order, while Improved Euler (Heun's) uses a predictor-corrector approach to achieve second-order accuracy.
+
+\subsection{Runge-Kutta 4th Order (RK4)}
+RK4 is the most widely used integrator due to its excellent balance of computational cost and accuracy.
 \begin{align}
     k_1 &= f(t_n, y_n) \\
     k_2 &= f(t_n + h/2, y_n + h k_1/2) \\
@@ -164,47 +182,88 @@ RK4 is a high-accuracy fourth-order method:
     k_4 &= f(t_n + h, y_n + h k_3) \\
     y_{n+1} &= y_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)
 \end{align}
+The error per step is $\mathcal{O}(h^5)$, and the global error is $\mathcal{O}(h^4)$.
 
-\section{Error Analysis}
-Numerical errors are classified into:
-\begin{itemize}
-    \item \textbf{Truncation Error}: From approximating an infinite process with a finite one.
-    \item \textbf{Round-off Error}: From finite floating-point precision.
-\end{itemize}
-We utilize \texttt{nm::common::Result<T>} structures to track the convergence history and residual errors of every computation.
+\section{Engineering Architecture}
+The software is designed using modern C++ principles. A core feature is the \texttt{nm::common::Result<T>} structure, which ensures that every computation is accompanied by its metadata.
 
-\section{Results and Visualizations}
-Empirical verification was performed for all modules. The following figures demonstrate the convergence characteristics of the implemented algorithms.
+\begin{lstlisting}[caption=Definition of the Result structure]
+template <typename T>
+struct Result {
+    T value;                    // Computed numerical result
+    Status status;              // Success, Diverged, MaxIterationsReached
+    int iterations;             // Total iteration count
+    std::vector<double> errors; // Error history for convergence analysis
+};
+\end{lstlisting}
 
-\subsection{Convergence of Root Finding}
-The comparison between Bisection and Newton-Raphson (see Fig. \ref{fig:root_finding}) highlights the quadratic nature of Newton's method. While Bisection requires $\sim 40$ iterations for $10^{-12}$ precision, Newton's method converges in fewer than 10.
+By utilizing template specialization and the Eigen library, we ensure that the solvers are generic and can handle both scalar (double) and vector (Eigen::VectorXd) inputs seamlessly.
+
+\newpage
+\section{Results and Performance Analysis}
+This section presents the empirical validation of our implemented algorithms.
+
+\subsection{Root Finding Convergence}
+Figure \ref{fig:root_finding} shows the absolute error decay for $f(x) = x^2 - 2$. The quadratic convergence of the Newton-Raphson method is clearly visible compared to the linear convergence of the Bisection method.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{assets/images/root_finding_convergence.png}
-    \caption{Absolute error vs. iteration for root-finding algorithms.}
+    \includegraphics[width=0.85\textwidth]{assets/images/root_finding_convergence.png}
+    \caption{Convergence history comparison for Root-Finding algorithms. Note the logarithmic scale on the y-axis, highlighting the rapid decay of Newton-Raphson.}
     \label{fig:root_finding}
 \end{figure}
 
-\subsection{ODE Solver Accuracy}
-Plotting the solution of $y' = y$ (see Fig. \ref{fig:ode}) demonstrates that RK4 remains highly accurate even with relatively large step sizes $h$, whereas the Euler method accumulates significant local truncation error.
+\subsection{Linear Solver Efficiency}
+Iterative solvers like Jacobi and Gauss-Seidel were tested on a $10 \times 10$ diagonally dominant system. As shown in Figure \ref{fig:linear_conv}, Gauss-Seidel converges significantly faster than Jacobi, as it utilizes updated values immediately within the same iteration.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{assets/images/ode_comparison.png}
-    \caption{Solution of $y'=y$ using Euler and RK4 methods.}
+    \includegraphics[width=0.85\textwidth]{assets/images/linear_solver_convergence.png}
+    \caption{Residual norm reduction for Jacobi and Gauss-Seidel methods. Gauss-Seidel exhibits a steeper descent in error.}
+    \label{fig:linear_conv}
+\end{figure}
+
+\newpage
+\subsection{Numerical Integration Accuracy}
+The error decay for integrating $\sin(x)$ from $0$ to $\pi$ is analyzed in Figure \ref{fig:integration}. Simpson's rule demonstrates its fourth-order accuracy with a steeper slope on the log-log plot compared to the second-order Trapezoidal rule.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/images/integration_accuracy.png}
+    \caption{Log-log plot of integration error vs. number of intervals. The slopes correspond to the theoretical order of accuracy for each method.}
+    \label{fig:integration}
+\end{figure}
+
+\subsection{ODE Solver Stability}
+We compared Euler, Improved Euler, and RK4 methods for $y' = y, y(0) = 1$. Figure \ref{fig:ode} confirms that RK4 maintains high fidelity to the analytical solution $e^t$ even as time progresses, whereas Euler's method deviates rapidly due to accumulation of local truncation error.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/images/ode_comparison.png}
+    \caption{Numerical integration of $y' = y$. RK4 (red triangles) is indistinguishable from the analytical solution (dashed line).}
     \label{fig:ode}
 \end{figure}
 
+\newpage
+\section{Discussion and Lessons Learned}
+The development of this library revealed several critical insights into scientific computing:
+\begin{itemize}
+    \item \textbf{Stability vs. Speed:} The Bisection method, despite being the slowest, was the most reliable solver. In engineering, ensuring a solution exists is often more critical than finding it quickly.
+    \item \textbf{Error Propagation:} In ODE solvers, small local errors aggregate into significant global errors. High-order methods like RK4 are not just "better," they are necessary for long-term simulations.
+    \item \textbf{Matrix Conditioning:} For linear systems, iterative solvers are sensitive to the condition number of the matrix. Diagonal dominance is a powerful predictor of success.
+\end{itemize}
+
 \section{Conclusion}
-The \textit{Numerical Methods From Scratch} library demonstrates that modern C++20 is an excellent choice for scientific computing. By combining mathematical rigor with robust engineering practices, we have created a library that is both educationally valuable and computationally sound. Future work could include the implementation of implicit ODE solvers for stiff systems and multi-dimensional root-finding.
+The \textit{Numerical Methods From Scratch} project successfully implemented a suite of core engineering algorithms. By starting from first principles, we ensured that every design choice was mathematically justified and empirically verified. The library demonstrates that C++20 is a powerful tool for modern numerical analysis, offering both high-level abstractions and low-level performance. Future work will focus on expanding into partial differential equations and non-linear optimization.
 
 \newpage
 \begin{thebibliography}{9}
 \bibitem{burden}
 Burden, R. L., \& Faires, J. D. (2010). \textit{Numerical Analysis}. Cengage Learning.
-\bibitem{knuth}
-Knuth, D. E. (1997). \textit{The Art of Computer Programming, Volume 2: Seminumerical Algorithms}. Addison-Wesley.
+\bibitem{press}
+Press, W. H., Teukolsky, S. A., Vetterling, W. T., \& Flannery, B. P. (2007). \textit{Numerical Recipes 3rd Edition: The Art of Scientific Computing}. Cambridge University Press.
+\bibitem{eigen}
+Guennebaud, G., Jacob, B., et al. (2010). \textit{Eigen v3}. http://eigen.tuxfamily.org.
 \bibitem{cpp20}
 ISO/IEC. (2020). \textit{ISO/IEC 14882:2020 Programming languages --- C++}.
 \end{thebibliography}
