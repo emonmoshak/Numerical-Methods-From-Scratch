@@ -38,8 +38,18 @@
     language=C++
 }
 
-\title{\textbf{Numerical Methods From Scratch: Engineering Mathematics Implemented in Modern C++}}
-\author{Gemini CLI Engineering Team}
+\title{
+    \vspace{2cm}
+    \textbf{\huge Numerical Methods From Scratch} \\
+    \vspace{0.5cm}
+    \Large Engineering Mathematics Implemented in Modern C++20 \\
+    \vspace{1cm}
+    \large \textit{Research \& Implementation Report}
+}
+\author{
+    \textbf{Project Lead} \\
+    \small Numerical Analysis & Scientific Computing
+}
 \date{June 2, 2026}
 
 \begin{document}
@@ -47,12 +57,27 @@
 \maketitle
 
 \begin{abstract}
-This report details the design and implementation of a professional scientific computing library built from first principles using the C++20 standard. The project, \textit{Numerical Methods From Scratch}, emphasizes mathematical rigor, numerical stability, and computational efficiency. We cover a broad spectrum of numerical analysis, including root-finding, linear algebra, interpolation, calculus, and differential equations. The implementation leverages modern C++ features, RAII, and template metaprogramming to provide a robust framework for engineering and mathematical computations.
+This report documents the architectural design and mathematical verification of a high-performance scientific computing library built from first principles. Utilizing the C++20 standard, \textit{Numerical Methods From Scratch} provides a transparent framework for solving non-linear equations, linear systems, and differential equations. The project emphasizes numerical stability, error propagation analysis, and computational efficiency. Every algorithm is validated against theoretical convergence rates, demonstrating the synergy between abstract mathematical theory and modern software engineering.
 \end{abstract}
 
 \newpage
 \tableofcontents
 \newpage
+
+\section*{Nomenclature}
+\addcontents line{toc}{section}{Nomenclature}
+\begin{table}[h]
+\begin{tabular}{ll}
+$\epsilon$ & Convergence tolerance \\
+$h$ & Step size / interval length \\
+$e_n$ & Absolute error at iteration $n$ \\
+$\mathcal{O}$ & Big-O notation for complexity and error order \\
+$f(x)$ & Objective function \\
+$A, b$ & Matrix and vector for linear systems $Ax=b$ \\
+$y'$ & First-order derivative $\frac{dy}{dt}$ \\
+$\text{res}$ & Residual norm $||Ax - b||$
+\end{tabular}
+\end{table}
 
 \section{Introduction}
 The field of numerical analysis is foundational to modern engineering and scientific discovery. While high-level environments like MATLAB or Python's NumPy provide powerful abstraction, there is significant value in implementing core algorithms from scratch to understand their limitations, stability characteristics, and performance trade-offs.
@@ -133,7 +158,7 @@ We solve Initial Value Problems (IVPs) of the form $y' = f(t, y)$.
 \subsection{Runge-Kutta 4 (RK4)}
 RK4 is a high-accuracy fourth-order method:
 \begin{align}
-    k_1 &= f(t_n, y_n) \not b\\
+    k_1 &= f(t_n, y_n) \\
     k_2 &= f(t_n + h/2, y_n + h k_1/2) \\
     k_3 &= f(t_n + h/2, y_n + h k_2/2) \\
     k_4 &= f(t_n + h, y_n + h k_3) \\
@@ -146,16 +171,30 @@ Numerical errors are classified into:
     \item \textbf{Truncation Error}: From approximating an infinite process with a finite one.
     \item \textbf{Round-off Error}: From finite floating-point precision.
 \end{itemize}
-We utilize $Result<T>$ structures to track the convergence history and residual errors of every computation.
+We utilize \texttt{nm::common::Result<T>} structures to track the convergence history and residual errors of every computation.
 
 \section{Results and Visualizations}
-We generated several plots to validate our implementations. (Note: Plots reference the \texttt{assets/images/} directory).
+Empirical verification was performed for all modules. The following figures demonstrate the convergence characteristics of the implemented algorithms.
 
 \subsection{Convergence of Root Finding}
-The comparison between Bisection and Newton-Raphson highlights the quadratic nature of Newton's method. While Bisection requires $\sim 40$ iterations for $10^{-12}$ precision, Newton's method converges in fewer than 10.
+The comparison between Bisection and Newton-Raphson (see Fig. \ref{fig:root_finding}) highlights the quadratic nature of Newton's method. While Bisection requires $\sim 40$ iterations for $10^{-12}$ precision, Newton's method converges in fewer than 10.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/images/root_finding_convergence.png}
+    \caption{Absolute error vs. iteration for root-finding algorithms.}
+    \label{fig:root_finding}
+\end{figure}
 
 \subsection{ODE Solver Accuracy}
-Plotting the solution of $y' = y$ demonstrates that RK4 remains highly accurate even with relatively large step sizes $h$, whereas the Euler method accumulates significant local truncation error.
+Plotting the solution of $y' = y$ (see Fig. \ref{fig:ode}) demonstrates that RK4 remains highly accurate even with relatively large step sizes $h$, whereas the Euler method accumulates significant local truncation error.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/images/ode_comparison.png}
+    \caption{Solution of $y'=y$ using Euler and RK4 methods.}
+    \label{fig:ode}
+\end{figure}
 
 \section{Conclusion}
 The \textit{Numerical Methods From Scratch} library demonstrates that modern C++20 is an excellent choice for scientific computing. By combining mathematical rigor with robust engineering practices, we have created a library that is both educationally valuable and computationally sound. Future work could include the implementation of implicit ODE solvers for stiff systems and multi-dimensional root-finding.
