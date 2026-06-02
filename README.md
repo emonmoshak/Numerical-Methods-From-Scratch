@@ -13,10 +13,6 @@ A professional-grade scientific computing library implementing core numerical me
 ### 🌎 Why Numerical Methods Matter
 Numerical methods are the silent engines of modern engineering. In **Robotics**, they enable real-time trajectory optimization; in **Aerospace**, they facilitate structural integrity simulations; and in **Physics**, they allow us to model complex systems that have no analytical solution. This library provides a transparent, first-principles implementation of these essential tools.
 
-### Target Audience
-* 🎓 **Engineering Professors:** A reference for numerical analysis pedagogy.
-* 🏆 **Scholarship Reviewers:** Demonstration of advanced software engineering and applied mathematics.
-* 🤖 **Robotics Researchers:** Efficient, stable solvers for kinematics, dynamics, and estimation.
 
 ---
 
